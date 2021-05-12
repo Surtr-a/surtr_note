@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:surtr_note/modules/home/components/body.dart';
 import 'package:surtr_note/routes/app_routes.dart';
 import 'package:surtr_note/utils/utils.dart';
@@ -38,6 +39,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         Tween(begin: 0.0, end: -1.0).animate(_animationController);
     _secondRotationAnimation =
         Tween(begin: 0.0, end: -2.0).animate(_animationController);
+    Future.delayed(Duration(seconds: 1)).then((value) async {
+      String? tip = await controller.checkTimer();
+      if (tip != null) {
+        toast(tip);
+      }
+    });
   }
 
   @override

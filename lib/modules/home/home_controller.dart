@@ -33,6 +33,38 @@ class HomeController extends GetxController {
     }
   }
 
+  String? checkTimer() {
+    int timeoutCount = 0;
+    int willTimeoutCount = 0;
+    DateTime now = DateTime.now();
+    notes.forEach((element) {
+      int? target = element.notification?.toInt();
+      if (target != null) {
+        if (target <= now.millisecondsSinceEpoch) {
+          ++timeoutCount;
+        } else if ((target - now.millisecondsSinceEpoch) <
+            Duration(minutes: 10).inMilliseconds) {
+          ++willTimeoutCount;
+        }
+      }
+    });
+    String tip = '您有';
+    if (timeoutCount != 0) {
+      tip += '$timeoutCount个任务已过期';
+      if (willTimeoutCount != 0) {
+        tip += '，';
+      }
+    }
+    if (willTimeoutCount != 0) {
+      tip += '$willTimeoutCount个任务即将过期';
+    }
+    if (tip != '您有') {
+      tip += '。';
+      return tip;
+    }
+    return null;
+  }
+
   Future finish(int index) async {
     Note note = notes[index];
     source[source.indexOf(note)].status = 1;
