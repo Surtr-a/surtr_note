@@ -1,0 +1,54 @@
+import 'package:dio/dio.dart';
+import 'package:logging/logging.dart';
+import 'app_exceptions.dart';
+
+final Logger _log = Logger('AppResponse');
+
+class AppResponse {
+  bool? _ok;
+
+  bool get ok => _ok ?? false;
+
+  dynamic _data;
+
+  dynamic get data => _data;
+
+  AppException? _error;
+
+  AppException get error => _error ?? AppException();
+
+  factory AppResponse.obtain(Response response) {
+    try {
+      if (response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300 &&
+          response.data != null &&
+          response.data['err_no'] == 0) {
+        return AppResponse._success(response.data);
+      }
+      if (response.data != null && response.data['err_no'] != 0) {
+        return AppResponse._failure(
+            errorMsg:
+                response.data['err_msg']?.toString() ?? response.statusMessage, errorCode: response.data['err_no']);
+      }
+      return AppResponse._failureFromError(
+          HttpException(response.statusMessage, response.statusCode));
+    } catch (e) {
+      _log.severe('obtain = ${e.toString()}');
+      return AppResponse._failure(errorMsg: e.toString());
+    }
+  }
+
+  AppResponse._success([dynamic data]) {
+    _data = data;
+    _ok = true;
+  }
+
+  AppResponse._failure({String? errorMsg, int? errorCode}) {
+    _error = AppException(errorMsg, errorCode);
+  }
+
+  AppResponse._failureFromError(AppException error) {
+    _error = error;
+  }
+}
