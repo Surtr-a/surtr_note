@@ -147,7 +147,7 @@ class InputPage extends GetView<InputController> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '2021-10-12 12:22:33',
+                                TimeUtil.getSimpleDateStr(DateTime.fromMillisecondsSinceEpoch(controller.note!.notification!.toInt())),
                                 style: TextStyle(color: CustomColor.MPink),
                               ),
                               if (_.enable.value)
