@@ -70,7 +70,11 @@ class Body extends GetView<HomeController> {
                             trailing: Container(
                               width: 2,
                               height: 32,
-                              color: CustomColor.MPink.withOpacity(.7),
+                              color: controller.timeoutId.contains(controller.notes[index].id)
+                                  ? Colors.red
+                                  : controller.willTimeoutId.contains(controller.notes[index].id)
+                                      ? Colors.orange.withOpacity(.4)
+                                      : null,
                             ),
                           ),
                         ),

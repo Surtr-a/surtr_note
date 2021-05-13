@@ -37,7 +37,7 @@ class InputPage extends GetView<InputController> {
             builder: (_) => Padding(
                   padding: EdgeInsets.only(right: 12),
                   child: GestureDetector(
-                    onTap: () => controller.enable.value
+                    onTap: () => controller.enable.value || controller.note?.notification != null
                         ? Get.dialog(_timeDialog,
                             barrierColor: Colors.black.withOpacity(.2))
                         : null,
@@ -70,8 +70,7 @@ class InputPage extends GetView<InputController> {
           child: GestureDetector(
               onTap: () async {
                 FocusScope.of(context).requestFocus(FocusNode());
-                if (controller.note != null &&
-                    controller.note!.title == controller.titleController.text &&
+                if (controller.isEdit && controller.note!.title == controller.titleController.text &&
                     controller.note!.content ==
                         controller.contentController.text &&
                     controller.hasTimer ==
@@ -121,7 +120,7 @@ class InputPage extends GetView<InputController> {
                               initialTime: TimeOfDay.now());
                         }
                         if (time != null) {
-                          date!.add(
+                          date = date!.add(
                               Duration(hours: time.hour, minutes: time.minute));
                           controller.addNotification(date);
                         }
@@ -142,24 +141,29 @@ class InputPage extends GetView<InputController> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       color: CustomColor.MPink.withOpacity(.1),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '2021-10-12 12:22:33',
-                            style: TextStyle(color: CustomColor.MPink),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              controller.deleteNotification();
-                              Get.back();
-                            },
-                            child: Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ),
-                          )
-                        ],
+                      child: GetX<InputController>(
+                        builder: (_) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '2021-10-12 12:22:33',
+                                style: TextStyle(color: CustomColor.MPink),
+                              ),
+                              if (_.enable.value)
+                                GestureDetector(
+                                  onTap: () {
+                                    controller.deleteNotification();
+                                    Get.back();
+                                  },
+                                  child: Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                )
+                            ],
+                          );
+                        }
                       ),
                     )
             ],

@@ -36,7 +36,7 @@ class RecordController extends GetxController {
     if (await Permission.microphone.status.isDenied || await Permission.storage.status.isDenied) {
       var micStatus = await Permission.microphone.request();
       var storageStatus = await Permission.storage.request();
-      if (!micStatus.isGranted || !storageStatus.isDenied) {
+      if (!micStatus.isGranted || !storageStatus.isGranted) {
         Get.back();
       }
     }

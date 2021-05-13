@@ -1,5 +1,6 @@
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:surtr_note/data/local/local_data.dart';
 import 'package:surtr_note/data/models/note.dart';
@@ -7,6 +8,8 @@ import 'package:surtr_note/data/models/note.dart';
 class HomeController extends GetxController {
   List<Note> source = [];
   List<Note> notes = [];
+  List<int> timeoutId = [];
+  List<int> willTimeoutId = [];
   final localData = Get.find<LocalData>();
   late final RefreshController refreshController;
   late final SlidableController slidableController;
@@ -21,7 +24,12 @@ class HomeController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    getList();
+    getList().then((value) {
+      String? tip = _getTips();
+      if (tip != null) {
+        toast(tip, duration: Toast.LENGTH_LONG);
+      }
+    });
   }
 
   Future getList() async {
@@ -29,34 +37,36 @@ class HomeController extends GetxController {
     if (list != null) {
       source = list;
       notes = source.where((value) => value.status == 0).toList();
+      _checkTimer();
       update();
     }
   }
 
-  String? checkTimer() {
-    int timeoutCount = 0;
-    int willTimeoutCount = 0;
+  String? _checkTimer() {
     DateTime now = DateTime.now();
     notes.forEach((element) {
       int? target = element.notification?.toInt();
       if (target != null) {
         if (target <= now.millisecondsSinceEpoch) {
-          ++timeoutCount;
+          timeoutId.add(element.id!.toInt());
         } else if ((target - now.millisecondsSinceEpoch) <
             Duration(minutes: 10).inMilliseconds) {
-          ++willTimeoutCount;
+          willTimeoutId.add(element.id!.toInt());
         }
       }
     });
+  }
+  
+  String? _getTips() {
     String tip = '您有';
-    if (timeoutCount != 0) {
-      tip += '$timeoutCount个任务已过期';
-      if (willTimeoutCount != 0) {
+    if (timeoutId.length != 0) {
+      tip += '${timeoutId.length}个任务已过期';
+      if (willTimeoutId.length != 0) {
         tip += '，';
       }
     }
-    if (willTimeoutCount != 0) {
-      tip += '$willTimeoutCount个任务即将过期';
+    if (willTimeoutId.length != 0) {
+      tip += '${willTimeoutId.length}个任务即将过期';
     }
     if (tip != '您有') {
       tip += '。';
@@ -83,6 +93,7 @@ class HomeController extends GetxController {
   void onRefresh() async {
     await Future.delayed(Duration(seconds: 1));
     await getList();
+    toast('刷新成功');
     refreshController.refreshCompleted();
   }
 }
