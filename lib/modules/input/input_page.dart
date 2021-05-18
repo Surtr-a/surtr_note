@@ -12,21 +12,31 @@ class InputPage extends GetView<InputController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _appBar(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var result =
-              await Get.toNamed(Routes.RECORD, arguments: {'back': true});
-          if (result != null) controller.contentController.text = result[0];
-        },
-        child: Icon(
-          Icons.mic,
-          color: Colors.white,
+    return WillPopScope(
+      onWillPop: () async {
+        if (!controller.isEdit &&
+            (controller.titleController.text.length != 0 ||
+                controller.contentController.text.length != 0)) {
+          controller.saveTemp();
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: _appBar(context),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            var result =
+                await Get.toNamed(Routes.RECORD, arguments: {'back': true});
+            if (result != null) controller.contentController.text = result[0];
+          },
+          child: Icon(
+            Icons.mic,
+            color: Colors.white,
+          ),
         ),
+        body: Body(),
       ),
-      body: Body(),
     );
   }
 
@@ -37,7 +47,8 @@ class InputPage extends GetView<InputController> {
             builder: (_) => Padding(
                   padding: EdgeInsets.only(right: 12),
                   child: GestureDetector(
-                    onTap: () => controller.enable.value || controller.note?.notification != null
+                    onTap: () => controller.enable.value ||
+                            controller.note?.notification != null
                         ? Get.dialog(_timeDialog,
                             barrierColor: Colors.black.withOpacity(.2))
                         : null,
@@ -70,7 +81,8 @@ class InputPage extends GetView<InputController> {
           child: GestureDetector(
               onTap: () async {
                 FocusScope.of(context).requestFocus(FocusNode());
-                if (controller.isEdit && controller.note!.title == controller.titleController.text &&
+                if (controller.isEdit &&
+                    controller.note!.title == controller.titleController.text &&
                     controller.note!.content ==
                         controller.contentController.text &&
                     controller.hasTimer ==
@@ -122,7 +134,7 @@ class InputPage extends GetView<InputController> {
                         if (time != null) {
                           date = date!.add(
                               Duration(hours: time.hour, minutes: time.minute));
-                          controller.addNotification(date);
+                          controller.addNotification(dateTime: date);
                         }
                         Get.back();
                       },
@@ -141,30 +153,30 @@ class InputPage extends GetView<InputController> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       color: CustomColor.MPink.withOpacity(.1),
-                      child: GetX<InputController>(
-                        builder: (_) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                TimeUtil.getSimpleDateStr(DateTime.fromMillisecondsSinceEpoch(controller.note!.notification!.toInt())),
-                                style: TextStyle(color: CustomColor.MPink),
-                              ),
-                              if (_.enable.value)
-                                GestureDetector(
-                                  onTap: () {
-                                    controller.deleteNotification();
-                                    Get.back();
-                                  },
-                                  child: Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                )
-                            ],
-                          );
-                        }
-                      ),
+                      child: GetX<InputController>(builder: (_) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              TimeUtil.getSimpleDateStr(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                      controller.note!.notification!.toInt())),
+                              style: TextStyle(color: CustomColor.MPink),
+                            ),
+                            if (_.enable.value)
+                              GestureDetector(
+                                onTap: () {
+                                  controller.deleteNotification();
+                                  Get.back();
+                                },
+                                child: Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                              )
+                          ],
+                        );
+                      }),
                     )
             ],
           ),

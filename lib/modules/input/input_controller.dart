@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:surtr_note/data/local/local_data.dart';
 import 'package:surtr_note/data/models/note.dart';
+import 'package:surtr_note/material/confirm_dialog.dart';
 
 class InputController extends GetxController {
   Note? note = Get.arguments?['note'];
@@ -12,13 +13,44 @@ class InputController extends GetxController {
   late TextEditingController titleController;
   late TextEditingController contentController;
 
-
   @override
   void onInit() {
     super.onInit();
     hasTimer = note?.notification != null;
     titleController = TextEditingController(text: note?.title);
-    contentController = TextEditingController(text: note?.content ?? record?[0]);
+    contentController =
+        TextEditingController(text: note?.content ?? record?[0]);
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    getTemp();
+  }
+
+  Future getTemp() async {
+    if (isEdit) return;
+    var note = await Get.find<LocalData>().getTempNote();
+    if (note != null) {
+      Get.dialog(ConfirmDialog(
+        content: '是否继续上次的创建？',
+        okCallback: () {
+          Get.back();
+          titleController.text = note.title ?? '';
+          contentController.text = note.content ?? '';
+          addNotification(tempNotification: note.notification);
+        },
+      )).then((value) => Get.find<LocalData>().saveTempNote());
+    }
+  }
+
+  Future saveTemp() async {
+    if (note == null) {
+      note = Note();
+    }
+    note!.title = titleController.text;
+    note!.content = contentController.text;
+    return await Get.find<LocalData>().saveTempNote(note: note!);
   }
 
   Future<void> save(String title, DateTime timeStamp) async {
@@ -40,11 +72,11 @@ class InputController extends GetxController {
     await Get.find<LocalData>().modifyNote(note!);
   }
 
-  void addNotification(DateTime dateTime) {
+  void addNotification({DateTime? dateTime, num? tempNotification}) {
     if (note == null) {
       note = Note();
     }
-    note?.notification = dateTime.millisecondsSinceEpoch;
+    note?.notification = tempNotification ?? dateTime!.millisecondsSinceEpoch;
     update();
   }
 

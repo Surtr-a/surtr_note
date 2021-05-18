@@ -29,7 +29,7 @@ class RecordController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    Future.delayed(Duration(seconds: 1)).then((value) => permissionCheck());
+    permissionCheck();
   }
 
   Future<void> permissionCheck() async {
