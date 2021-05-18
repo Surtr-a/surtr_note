@@ -31,8 +31,11 @@ class Body extends GetView<RecordController> {
                       if (result != null) {
                         if (controller.back)
                           Get.back(result: result);
-                        else
-                          Get.offNamed(Routes.INPUT, arguments: {'record': result});
+                        else {
+                          var updated = await Get.toNamed(Routes.INPUT, arguments: {'record': result});
+                          if (updated != null && updated == true)
+                            Get.back(result: true);
+                        }
                       }
                     }));
                 if (result != null) {

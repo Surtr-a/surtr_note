@@ -29,7 +29,7 @@ class InputController extends GetxController {
   }
 
   Future getTemp() async {
-    if (isEdit) return;
+    if (isEdit || record != null) return;
     var note = await Get.find<LocalData>().getTempNote();
     if (note != null) {
       Get.dialog(ConfirmDialog(

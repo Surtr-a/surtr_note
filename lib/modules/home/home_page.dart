@@ -57,10 +57,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: GestureDetector(
-                  onTap: () async {
-                    await Get.toNamed(Routes.HISTORY);
-                    controller.getList();
-                  },
+                    onTap: () async {
+                      await Get.toNamed(Routes.HISTORY);
+                      controller.getList();
+                    },
                     child: Icon(Icons.history)),
               )
             ],
@@ -124,9 +124,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: FloatingActionButton(
-                    onPressed: () {
+                    onPressed: () async {
                       _close();
-                      Get.toNamed(Routes.RECORD);
+                      var updated = await Get.toNamed(Routes.RECORD);
+                      if (updated != null && updated == true) {
+                        controller.getList();
+                      }
                     },
                     heroTag: 'record',
                     elevation: _opacity == 0 ? 0 : null,
